@@ -1,0 +1,19 @@
+{
+  "name": "site-checker",
+  "version": "1.0.0",
+  "description": "Check if site is working on an interval and notify of downtime",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "author": "Laytan Laats",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0",
+    "dotenv": "^8.2.0"
+  }
+}
