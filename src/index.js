@@ -1,22 +1,27 @@
 const fetch = require('node-fetch');
+const TelegramBot = require('node-telegram-bot-api');
+const prettyMilliseconds = require('pretty-ms');
 require('dotenv').config();
 
 const SiteDownError = require('./SiteDownError');
 
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/`;
 
+let uptime = 0;
+
 // Send message to notify startup
 telegram("Bleep bloop started up!");
 
 // Check all sites every 60 seconds
 checkAll();
-setInterval(checkAll, 60000);
+setInterval(() => {
+  uptime += 60000;
+  checkAll();
+}, 60000);
 
 // Send a message every hour notifying that the bot is still running
-let uptime = 0;
 setInterval(() => {
-  uptime += 3600000;
-  telegram(`I am still running! Uptime: ${uptime / 1000} hours`);
+  telegram(`I am still running! Uptime: ${prettyMilliseconds(uptime)}`);
 }, 3600000);
 
 /**
@@ -74,3 +79,42 @@ function checkStatus(res) {
       throw new SiteDownError(res);
   }
 }
+
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
+
+// Matches "/help [whatever]"
+bot.onText(/\/help (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
+    return;
+  }
+
+  telegram("/check [site] will check a site, /check will check all sites in the environment, /uptime for uptime");
+});
+
+// Matches "/check [whatever]"
+bot.onText(/\/check (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
+    return;
+  }
+
+  const toCheck = match[1];
+  // Check specified url
+  if(toCheck && toCheck.length > 0) {
+    telegram(`Checking: ${toCheck}`);
+    check(toCheck);
+  } else {
+    telegram("Checking all sites");
+    checkAll();
+  }
+});
+
+// Matches "/uptime [whatever]"
+bot.onText(/\/uptime (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
+    return;
+  }
+  telegram(`Uptime: ${prettyMilliseconds(uptime)}`);
+});

@@ -13,7 +13,9 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
-    "dotenv": "^8.2.0"
+    "node-telegram-bot-api": "^0.40.0",
+    "pretty-ms": "^5.1.0"
   }
 }
