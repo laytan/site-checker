@@ -82,8 +82,8 @@ function checkStatus(res) {
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
 
-// Matches "/help [whatever]"
-bot.onText(/\/help (.+)/, (msg, match) => {
+// Matches "/help"
+bot.onText(/\/help/, (msg, match) => {
   console.log("Help request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
@@ -94,7 +94,7 @@ bot.onText(/\/help (.+)/, (msg, match) => {
 });
 
 // Matches "/check [whatever]"
-bot.onText(/\/check (.+)/, (msg, match) => {
+bot.onText(/\/check(.+)?/, (msg, match) => {
   console.log("Check request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
@@ -102,6 +102,7 @@ bot.onText(/\/check (.+)/, (msg, match) => {
   }
 
   const toCheck = match[1];
+  console.log(toCheck);
   // Check specified url
   if(toCheck && toCheck.length > 0) {
     telegram(`Checking: ${toCheck}`);
@@ -113,7 +114,7 @@ bot.onText(/\/check (.+)/, (msg, match) => {
 });
 
 // Matches "/uptime [whatever]"
-bot.onText(/\/uptime (.+)/, (msg, match) => {
+bot.onText(/\/uptime/, (msg, match) => {
   console.log("Uptime request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
