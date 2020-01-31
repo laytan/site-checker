@@ -117,6 +117,7 @@ bot.onText(/\/check(.+)?/, (msg, match) => {
 bot.onText(/\/uptime/, (msg, match) => {
   console.log("Uptime request");
   const chatId = msg.chat.id;
+  console.log(chatId);
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
     return;
   }
