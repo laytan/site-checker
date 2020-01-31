@@ -84,6 +84,7 @@ const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
 
 // Matches "/help [whatever]"
 bot.onText(/\/help (.+)/, (msg, match) => {
+  console.log("Help request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
     return;
@@ -94,6 +95,7 @@ bot.onText(/\/help (.+)/, (msg, match) => {
 
 // Matches "/check [whatever]"
 bot.onText(/\/check (.+)/, (msg, match) => {
+  console.log("Check request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
     return;
@@ -112,6 +114,7 @@ bot.onText(/\/check (.+)/, (msg, match) => {
 
 // Matches "/uptime [whatever]"
 bot.onText(/\/uptime (.+)/, (msg, match) => {
+  console.log("Uptime request");
   const chatId = msg.chat.id;
   if(chatId !== process.env.TELEGRAM_CHAT_ID) {
     return;
