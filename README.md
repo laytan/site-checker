@@ -17,3 +17,6 @@ How to get it:
 + Send a message to your bot from the telegram client you want to receive messages on
 + Run ``node getChatId``
 + Look through the response for your message and your chat_id should be in there
+
+### SITES_TO_CHECK
+Comma seperated list of sites to check eg: https://example.com, https://example2.com
