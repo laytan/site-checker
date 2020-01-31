@@ -85,21 +85,14 @@ const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
 // Matches "/help"
 bot.onText(/\/help/, (msg, match) => {
   console.log("Help request");
-  const chatId = msg.chat.id;
-  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
-    return;
-  }
-
+  if(!isMe(msg.chat.id)) return;
   telegram("/check [site] will check a site, /check will check all sites in the environment, /uptime for uptime");
 });
 
 // Matches "/check [whatever]"
 bot.onText(/\/check(.+)?/, (msg, match) => {
   console.log("Check request");
-  const chatId = msg.chat.id;
-  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
-    return;
-  }
+  if(!isMe(msg.chat.id)) return;
 
   const toCheck = match[1];
   console.log(toCheck);
@@ -116,10 +109,10 @@ bot.onText(/\/check(.+)?/, (msg, match) => {
 // Matches "/uptime [whatever]"
 bot.onText(/\/uptime/, (msg, match) => {
   console.log("Uptime request");
-  const chatId = msg.chat.id;
-  console.log(chatId);
-  if(chatId !== process.env.TELEGRAM_CHAT_ID) {
-    return;
-  }
+  if(!isMe(msg.chat.id)) return;
   telegram(`Uptime: ${prettyMilliseconds(uptime)}`);
 });
+
+function isMe(chatId) {
+  return chatId.toString().trim() === process.env.TELEGRAM_CHAT_ID.toString().trim();
+}
