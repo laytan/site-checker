@@ -8,6 +8,7 @@ const SiteDownError = require('./SiteDownError');
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/`;
 
 let uptime = 0;
+let muted = false;
 
 // Send message to notify startup
 telegram("Bleep bloop started up!");
@@ -16,13 +17,12 @@ telegram("Bleep bloop started up!");
 checkAll();
 setInterval(() => {
   uptime += 60000;
-  checkAll();
-}, 60000);
 
-// Send a message every hour notifying that the bot is still running
-setInterval(() => {
-  telegram(`I am still running! Uptime: ${prettyMilliseconds(uptime)}`);
-}, 3600000);
+  if(!muted) {
+    checkAll();
+  }
+
+}, 60000);
 
 /**
  * Split the environment on commas for sites to check
@@ -86,7 +86,13 @@ const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
 bot.onText(/\/help/, (msg, match) => {
   console.log("Help request");
   if(!isMe(msg.chat.id)) return;
-  telegram("/check [site] will check a site, /check will check all sites in the environment, /uptime for uptime");
+  telegram(
+    "/check [site] will check a site," +
+    "/check will check all sites in the environment," + 
+    "/uptime for uptime," +
+    "/mute [minutes] for muting messages." +
+    "/unmute for unmuting" 
+  );
 });
 
 // Matches "/check [whatever]"
@@ -111,6 +117,27 @@ bot.onText(/\/uptime/, (msg, match) => {
   console.log("Uptime request");
   if(!isMe(msg.chat.id)) return;
   telegram(`Uptime: ${prettyMilliseconds(uptime)}`);
+});
+
+// Matches "/mute [whatever]"
+bot.onText(/\/mute(.+)?/, (msg, match) => {
+  console.log("Mute Request");
+  if(!isMe(msg.chat.id)) return;
+  const minutes = parseInt(match[1]);
+  const millis = (minutes * 60) * 1000;
+  telegram(`Muting for ${minutes} minutes`);
+
+  muted = true;
+  setTimeout(() => muted = false, millis);
+});
+
+// Matches "/unmute
+bot.onText(/\/unmute/, (msg, match) => {
+  console.log("Unmute Request");
+  if(!isMe(msg.chat.id)) return;
+  telegram("Unmuting");
+
+  muted = false;
 });
 
 function isMe(chatId) {
