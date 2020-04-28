@@ -3,26 +3,28 @@ const TelegramBot = require('node-telegram-bot-api');
 const prettyMilliseconds = require('pretty-ms');
 require('dotenv').config();
 
-const SiteDownError = require('./SiteDownError');
+// const SiteDownError = require('./SiteDownError');
 
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/`;
 
 let uptime = 0;
 let muted = false;
 
+const down = {};
+
 // Send message to notify startup
 telegram("Bleep bloop started up!");
 
-// Check all sites every 60 seconds
+// Check all sites every 30 seconds
 checkAll();
 setInterval(() => {
-  uptime += 60000;
+  uptime += 30000;
 
   if(!muted) {
     checkAll();
   }
 
-}, 60000);
+}, 30000);
 
 /**
  * Split the environment on commas for sites to check
@@ -46,17 +48,44 @@ function checkAll() {
  */
 function check(site) {
   fetch(site)
-    .then(checkStatus)
-    .catch(notifyDown);
+    .then(({ ok, status }) => {
+      if(ok) {
+        if(down[site]) {
+          notifyBack(site);
+        }
+      } else {
+        notifyDown(site, `Site: ${site} is down with status code: ${status}.`);
+      }
+    })
+    .catch(({ message }) => {
+      notifyDown(site, `Site: ${site} is down with error: ${message}`);
+    });
+}
+
+function notifyBack(site) {
+  const minutesOffline = Math.floor(Math.abs(down[site].downAt - new Date()) / 60000);
+  telegram(`Site: ${site} is back online after ${minutesOffline} minutes!`);
+  console.log(`${site} is back`);
+  delete down[site];
 }
 
 /**
  * Telegram the error
- * @param {Error} err the error to notify about
+ * @param {string} site
+ * @param {string} message
  */
-function notifyDown(err) {
-  console.log(err);
-  telegram(err.message);
+function notifyDown(site, message) {
+  if (!down[site]) {
+    console.log(`${site} is down for the first time`);
+    down[site] = {
+      message,
+      downAt: new Date(),
+    };
+
+    telegram(message);
+  } else {
+    console.log(`${site} is still down`);
+  }
 }
 
 /**
@@ -66,18 +95,6 @@ function notifyDown(err) {
 function telegram(message) {
   fetch(`${TELEGRAM_API_URL}sendMessage?chat_id=${process.env.TELEGRAM_CHAT_ID}&text=${message}`)
     .catch(console.error);
-}
-
-/**
- * Checks for a statuscode that is not between 200 and 300
- * @param {Response} res response to get request of a site
- */
-function checkStatus(res) {
-  if (res.ok) {
-      return res;
-  } else {
-      throw new SiteDownError(res);
-  }
 }
 
 const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
