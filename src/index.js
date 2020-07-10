@@ -64,8 +64,12 @@ function check(site) {
 
 function notifyBack(site) {
   const minutesOffline = Math.floor(Math.abs(down[site].downAt - new Date()) / 60000);
-  telegram(`Site: ${site} is back online after ${minutesOffline} minutes!`);
   console.log(`${site} is back`);
+  
+  if (down[site].downAmt > 1) {
+    telegram(`Site: ${site} is back online after ${minutesOffline} minutes!`);
+  }
+
   delete down[site];
 }
 
@@ -80,11 +84,15 @@ function notifyDown(site, message) {
     down[site] = {
       message,
       downAt: new Date(),
+      downAmt: 1,
     };
-
-    telegram(message);
   } else {
+    down[site].downAmt++;
     console.log(`${site} is still down`);
+  }
+
+  if(down[site].downAmt > 1) {
+    telegram(message);
   }
 }
 
